@@ -12,8 +12,8 @@ router.get("/getById/:id", authMiddleware, verifyAdmin, ProductController.getByI
 router.put("/updateById/:id", authMiddleware, verifyAdmin, ProductController.update);
 router.delete("/delete/:id", authMiddleware, verifyAdmin, ProductController.remove);
 
-//User Routes
-router.get("/public/getAllProduct", ProductController.getAllPublic);
-router.get("/public/getById/:id", ProductController.getByIdPublic);
+// ================= PUBLIC =================
+router.get("/public/products", ProductController.getPublicProducts);
+router.get("/public/products/:id", ProductController.getPublicProductById);
 
 export default router;
