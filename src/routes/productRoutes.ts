@@ -13,7 +13,8 @@ router.put("/updateById/:id", authMiddleware, verifyAdmin, ProductController.upd
 router.delete("/delete/:id", authMiddleware, verifyAdmin, ProductController.remove);
 
 // ================= PUBLIC =================
-router.get("/public/products", ProductController.getPublicProducts);
-router.get("/public/products/:id", ProductController.getPublicProductById);
+router.get("/public/getAllProduct", ProductController.getPublicProducts);
+router.get("/public/getById/:id", ProductController.getPublicProductById);
+// router.get("/public/banner", ProductController.getBannerProducts);
 
 export default router;
