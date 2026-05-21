@@ -6,10 +6,12 @@ class ProductController {
 
   // ================= ADMIN =================
 
+  // ================= ADMIN CREATE OVERHAUL =================
   static async create(req: Request, res: Response) {
     try {
       const data = req.body;
 
+      // Ensure itemType is checked as a required property constraint validation
       if (!data.name || !data.category || data.price == null) {
         return res.status(400).json({ success: false, message: "Missing required fields" });
       }
@@ -21,7 +23,8 @@ class ProductController {
         data: {
           name: data.name,
           category: data.category,
-          subCategory: data.subCategory || "",
+          subCategory: data.subCategory || "Women", // Default fallback bucket allocation safely
+          itemType: data.itemType, // 🔥 Saved directly into your MongoDB documents
           price: Number(data.price),
           weight: Number(data.weight || 0),
           description: data.description || "",
@@ -101,8 +104,7 @@ class ProductController {
     }
   }
 
-  // ================= PUBLIC (FILTER + SEARCH) =================
-
+// ================= PUBLIC (STRICT PRODUCT NAME SEARCH ONLY 🔥) =================
   static async getPublicProducts(req: Request, res: Response) {
     try {
       const { q, category } = req.query;
@@ -113,31 +115,38 @@ class ProductController {
         const map: Record<string, string> = {
           "1Gram Gold": "1Gram Gold Polished Jewellery",
           "1Gram Gold Polished Jewellery": "1Gram Gold Polished Jewellery",
-          Gold: "Gold",
-          Silver: "Silver",
+          "Gold": "Gold",
+          "Silver": "Silver",
         };
         return map[String(cat)] || String(cat);
       };
 
       const finalCategory = normalizeCategory(category);
+      let whereClause: any = {};
 
-      // 2. Build product query
+      // 2. Category Tab match rule
+      if (finalCategory) {
+        whereClause.category = finalCategory;
+      }
+
+      // 3. STRICT RULE: Search string ko SIRF aur SIRF name field par match karein
+      if (q && String(q).trim() !== "") {
+        whereClause.name = {
+          contains: String(q).trim(),
+          mode: "insensitive" // 'rings' ya 'RINGS' dono automatically match honge
+        };
+      }
+
       const queryOptions: any = {
-        where: {
-          ...(finalCategory && { category: finalCategory }),
-          ...(q && { name: { contains: String(q), mode: "insensitive" } }),
-        },
+        where: whereClause,
         orderBy: { created_at: "desc" },
       };
 
       const products = await prisma.product.findMany(queryOptions);
-
-      // Use the filtered products as banners directly
       const banners = products.slice(0, 5); 
 
       let featured = null;
       if (banners && banners.length > 0) {
-        // Calculate the sequential index independent of the calendar month
         const startOfYear = new Date(new Date().getFullYear(), 0, 1);
         const diff = Math.floor((new Date().getTime() - startOfYear.getTime()) / 86400000);
         const index = diff % banners.length;
@@ -151,10 +160,10 @@ class ProductController {
         featured,
       });
     } catch (error) {
-      console.error("Error in getPublicProducts:", error);
+      console.error("Error in strict getPublicProducts:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
-  }
+  }  
 
   static async getPublicProductById(req: Request, res: Response) {
     try {
