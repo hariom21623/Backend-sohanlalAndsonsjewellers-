@@ -1,3 +1,5 @@
+// prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -19,22 +21,27 @@ model User {
 }
 
 model Product {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  category    String
-  subCategory String?
-  price       Float
-  weight      Float
-  description String?
-  images      Json?     // store array of image URLs/base64
-  sku         String    @unique
-  stock       Int       @default(0)
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  category     String
+  subCategory  String?
+  price        Float
+  weight       Float
+  description  String?
+  images       Json?     // Normal square/portrait grid display images array
+  
+  // 🔥 NEW BANNER PIPELINE INJECTIONS
+  isBanner     Boolean  @default(false) // Dynamic banner visibility marker toggle
+  bannerImages Json?     // Holds explicit links layout: { desktopUrl: string, mobileUrl: string }
+
+  sku          String   @unique
+  stock        Int      @default(0)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
 }
 
 model Bill {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
   billNo        String
   invoiceNo     String
   customerName  String
@@ -43,24 +50,19 @@ model Bill {
   items         Json
   totalAmount   Float
   discount      Float
-  gstPercent    Float      // total GST (3%)
-  cgstPercent   Float?      // half GST 1.5%
-  sgstPercent   Float?      // half GST 1.5%
-  cgstAmount    Float?      // half GST amount
-  sgstAmount    Float?      // half GST amount
-  gstAmount     Float       // total GST amount
+  gstPercent    Float      
+  cgstPercent   Float?      
+  sgstPercent   Float?      
+  cgstAmount    Float?      
+  sgstAmount    Float?      
+  gstAmount     Float       
   netAmount     Float
-  paymentStatus String      @default("pending")
+  paymentStatus String    @default("pending")
   invoicePdfUrl String?
-  created_at    DateTime    @default(now())
+  created_at    DateTime  @default(now())
 }
-
 
 model Counter {
   id   String @id @map("_id")
   seq  Int
 }
-
-
-
-
