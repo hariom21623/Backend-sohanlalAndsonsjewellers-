@@ -10,14 +10,20 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  email       String   @unique
-  password    String
-  phoneNumber String   @unique
-  adminRole   Boolean? 
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  email          String   @unique
+  password       String
+  phoneNumber    String   @unique  // database me phoneNumber hai
+  
+  // 🚀 NEW INJECTIONS: User permanent billing profile data layers
+  address        String?  @default("") // Defaults to blank string safely
+  pincode        String?  @default("")
+  alternatePhone String?  @default("")
+  
+  adminRole      Boolean? 
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
 }
 
 model Product {
