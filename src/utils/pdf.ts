@@ -17,7 +17,7 @@ export async function htmlToPdf(html: string, outPath: string) {
   });
   try {
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(html, { waitUntil: "networkidle0" as any });
     await page.pdf({ path: outPath, format: "A4", printBackground: true });
   } finally {
     await browser.close();

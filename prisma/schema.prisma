@@ -72,3 +72,14 @@ model Counter {
   id   String @id @map("_id")
   seq  Int
 }
+
+model Order {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String
+  customerName  String
+  customerPhone String
+  items         Json     // Cart items yahan store honge
+  totalAmount   Float
+  status        String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  createdAt     DateTime @default(now())
+}

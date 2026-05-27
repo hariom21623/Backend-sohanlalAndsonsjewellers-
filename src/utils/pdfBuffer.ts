@@ -10,7 +10,7 @@ export async function htmlToPdfBuffer(html: string) {
   try {
     const page = await browser.newPage();
     await page.setViewport({ width: 820, height: 1000 });
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(html, { waitUntil: "networkidle0" as any });
 
     const buffer = await page.pdf({
       format: "A5",             // smaller than A4
