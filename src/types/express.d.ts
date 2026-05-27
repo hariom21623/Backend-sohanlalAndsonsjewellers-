@@ -1,4 +1,3 @@
-// src/types/express.d.ts
 import { Request } from "express";
 
 declare module "express-serve-static-core" {
@@ -7,6 +6,9 @@ declare module "express-serve-static-core" {
       id: string;
       name: string;
       email: string;
+      adminRole?: boolean;   // ✅ Yeh add karo
+      address?: string;      // ✅ Yeh add karo
+      pincode?: string;      // ✅ Yeh add karo
     };
   }
 }

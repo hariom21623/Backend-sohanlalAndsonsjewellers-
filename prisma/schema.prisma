@@ -78,8 +78,10 @@ model Order {
   userId        String
   customerName  String
   customerPhone String
-  items         Json     // Cart items yahan store honge
+  address       String?  
+  pincode       String?
+  items         Json
   totalAmount   Float
-  status        String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  status        String
   createdAt     DateTime @default(now())
 }
