@@ -63,34 +63,34 @@ export default class OrderController {
     }
   }
 
-  static async updateStatusOnly(req: Request, res: Response) {
-    try {
-      const { id } = req.params;
-      const { status } = req.body;
+  // static async updateStatusOnly(req: Request, res: Response) {
+  //   try {
+  //     const { id } = req.params;
+  //     const { status } = req.body;
 
-      const existingOrder = await prisma.order.findUnique({ where: { id } });
-      if (!existingOrder) return res.status(404).json({ success: false, message: "Order not found" });
+  //     const existingOrder = await prisma.order.findUnique({ where: { id } });
+  //     if (!existingOrder) return res.status(404).json({ success: false, message: "Order not found" });
 
-      if (status === "ACCEPTED" && existingOrder.status !== "ACCEPTED") {
-        const items = existingOrder.items as any[];
-        for (const item of items) {
-          await prisma.product.updateMany({
-            where: { name: item.name },
-            data: { stock: { decrement: item.qty } }
-          });
-        }
-      }
+  //     if (status === "ACCEPTED" && existingOrder.status !== "ACCEPTED") {
+  //       const items = existingOrder.items as any[];
+  //       for (const item of items) {
+  //         await prisma.product.updateMany({
+  //           where: { name: item.name },
+  //           data: { stock: { decrement: item.qty } }
+  //         });
+  //       }
+  //     }
 
-      const updatedOrder = await prisma.order.update({
-        where: { id },
-        data: { status }
-      });
+  //     const updatedOrder = await prisma.order.update({
+  //       where: { id },
+  //       data: { status }
+  //     });
 
-      return res.json({ success: true, order: updatedOrder });
-    } catch (err) {
-      return res.status(500).json({ success: false, message: "Status update failed" });
-    }
-  }
+  //     return res.json({ success: true, order: updatedOrder });
+  //   } catch (err) {
+  //     return res.status(500).json({ success: false, message: "Status update failed" });
+  //   }
+  // }
 
   static async editOrderDetails(req: Request, res: Response) {
     try {
@@ -114,6 +114,56 @@ export default class OrderController {
       return res.json({ success: true, message: "Order deleted" });
     } catch (err) {
       return res.status(500).json({ success: false });
+    }
+  }
+
+  static async getMyOrders(req: Request, res: Response) {
+    const userId = (req as any).user.id; // Auth middleware se mila
+    const orders = await prisma.order.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' }
+    });
+    return res.json({ success: true, orders });
+  }
+
+  static async updateOrderStatus(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body; // "ACCEPTED" ya "REJECTED"
+
+      // 1. Order Update karo
+      const order = await prisma.order.update({
+        where: { id },
+        data: { status }
+      });
+
+      // 2. Notification Create karo (Automatic)
+      if (status === "ACCEPTED") {
+        await prisma.notification.create({
+          data: {
+            userId: order.userId, // Order karne wale user ki ID
+            title: "Order Accepted!",
+            message: `Your order #${id.slice(-6).toUpperCase()} has been accepted and is being processed.`
+          }
+        });
+      }
+
+      return res.json({ success: true, message: "Order updated & notification sent!" });
+    } catch (error) {
+      return res.status(500).json({ success: false, message: "Error updating order" });
+    }
+  }
+
+  static async getMyNotifications(req: Request, res: Response) {
+    try {
+      const userId = (req as any).user.id;
+      const notifications = await prisma.notification.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' }
+      });
+      return res.json({ success: true, notifications });
+    } catch (err) {
+      return res.status(500).json({ success: false, message: "Server error" });
     }
   }
 }

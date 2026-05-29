@@ -85,3 +85,12 @@ model Order {
   status        String
   createdAt     DateTime @default(now())
 }
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId // Order karne wale user ki ID
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

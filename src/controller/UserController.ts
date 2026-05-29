@@ -51,15 +51,18 @@ class UserController {
   }
 
   // UPDATE USER
-  // UPDATE USER
   static async updateUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const updates = req.body;
+      const updates = { ...req.body }; // ✅ Clone karo taaki original body safe rahe
+
+      // ✅ FIX: 'id' ko updates object se delete kar do
+      if (updates.id) {
+        delete updates.id;
+      }
 
       // Check if user wants to modify adminRole
       if (updates.adminRole !== undefined) {
-        // Only admins can update adminRole
         if (!req.user || req.user.adminRole !== true) {
           return res.status(403).json({
             success: false,
@@ -76,7 +79,7 @@ class UserController {
 
       const updatedUser = await prisma.user.update({
         where: { id },
-        data: updates,
+        data: updates, // ✅ Ab yahan sirf safe fields hain
         select: {
           id: true,
           name: true,
@@ -84,7 +87,9 @@ class UserController {
           phoneNumber: true,
           adminRole: true,
           created_at: true,
-          updated_at: true
+          updated_at: true,
+          address: true, // ✅ Address aur pincode bhi return mein le lo
+          pincode: true
         }
       });
 
@@ -94,7 +99,7 @@ class UserController {
         user: updatedUser
       });
     } catch (error) {
-      console.error(error);
+      console.error("PRISMA UPDATE ERROR:", error);
       return res.status(500).json({
         success: false,
         message: "Something went wrong."
