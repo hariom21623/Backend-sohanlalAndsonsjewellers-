@@ -5,6 +5,7 @@
   "scripts": {
     "build": "prisma generate && tsc",
     "dev": "nodemon --exec tsx server.ts",
+    "dev:live": "env-cmd -f .env.dev nodemon --exec tsx server.ts",
     "prod": "nodemon --exec tsx server.ts",
     "serve": "env-cmd -f .env nodemon --exec tsx server.ts",
     "start": "node dist/server.js",
