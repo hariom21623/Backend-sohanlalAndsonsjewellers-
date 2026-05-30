@@ -10,7 +10,8 @@
     "start": "node dist/server.js",
     "generate": "prisma generate",
     "watch": "nodemon --watch 'src/**' --exec tsx server.ts",
-    "generate:key": "node src/utils/generateKey.js"
+    "generate:key": "node src/utils/generateKey.js",
+    "render:build": "npm install && npm run build && npx puppeteer browsers install chrome"
   },
   "author": "",
   "license": "ISC",
