@@ -21,5 +21,7 @@ router.get("/my-orders", authMiddleware, OrderController.getMyOrders);
 router.get("/notifications/my", authMiddleware, OrderController.getMyNotifications);
 // ✅ Admin status update ke liye PUT request
 router.put("/status/:id", authMiddleware, verifyAdmin, OrderController.updateOrderStatus);
+// orderRoutes.ts
+router.get("/bill-pdf/:id", OrderController.getOrderBillPdf);
 
 export default router;
