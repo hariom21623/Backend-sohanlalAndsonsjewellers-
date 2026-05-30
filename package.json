@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6.19.0",
+    "@sparticuz/chromium": "^149.0.0",
     "bcrypt": "^5.1.1",
     "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
@@ -33,6 +34,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "puppeteer": "^25.1.0",
+    "puppeteer-core": "^25.1.0",
     "swagger-ui-express": "^5.0.1",
     "twilio": "^5.10.6"
   },
