@@ -1,8 +1,9 @@
-import puppeteer from 'puppeteer';
-
 export const htmlToPdfBuffer = async (html: string) => {
-  // ✅ FIX: "new" ki jagah 'true' use karo
-  const browser = await puppeteer.launch({ headless: true });
+  const { default: puppeteer } = await import('puppeteer');
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
   const page = await browser.newPage();
   await page.setContent(html);
   const pdfBuffer = await page.pdf({ format: 'A4' });

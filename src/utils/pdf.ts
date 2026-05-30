@@ -1,7 +1,5 @@
-// src/utils/pdf.ts
 import fs from "fs";
 import path from "path";
-import puppeteer from "puppeteer";
 
 export async function ensureFolder(folder: string) {
   if (!fs.existsSync(folder)) {
@@ -9,8 +7,8 @@ export async function ensureFolder(folder: string) {
   }
 }
 
-// htmlToPdf(html: string, outPath: string)
 export async function htmlToPdf(html: string, outPath: string) {
+  const { default: puppeteer } = await import('puppeteer');
   ensureFolder(path.dirname(outPath));
   const browser = await puppeteer.launch({
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
