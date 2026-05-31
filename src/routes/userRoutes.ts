@@ -9,4 +9,5 @@ router.get("/getUsers/:id", authMiddleware,verifyAdmin, UserController.getUserBy
 router.get("/getUsers", authMiddleware, verifyAdmin, UserController.getAllUsers)
 router.put("/updateUser/:id", authMiddleware, UserController.updateUser);
 router.delete("/deleteUser/:id", authMiddleware, verifyAdmin, UserController.deleteUser);
+router.get("/profile", authMiddleware, UserController.getProfile);
 export default router;

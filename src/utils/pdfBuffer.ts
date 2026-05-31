@@ -1,31 +1,30 @@
-// src/utils/pdfBuffer.ts
-import puppeteer from "puppeteer";
+export const htmlToPdfBuffer = async (html: string) => {
+  const isProduction = process.env.IS_RENDER === 'true';
 
-export async function htmlToPdfBuffer(html: string) {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
+  let browser;
 
-  try {
-    const page = await browser.newPage();
-    await page.setViewport({ width: 820, height: 1000 });
-    await page.setContent(html, { waitUntil: "networkidle0" });
+  if (isProduction) {
+    const chromium = await import('@sparticuz/chromium');
+    const puppeteer = await import('puppeteer-core');
 
-    const buffer = await page.pdf({
-      format: "A5",             // smaller than A4
-      printBackground: false,    // big size reduction
-      scale: 0.85,               // reduce size
-      margin: {
-        top: "10mm",
-        bottom: "10mm",
-        left: "8mm",
-        right: "8mm",
-      },
+    browser = await puppeteer.default.launch({
+      args: chromium.default.args,
+      executablePath: await chromium.default.executablePath(),
+      headless: true,
     });
+  } else {
+    const puppeteer = await import('puppeteer-core');
 
-    return buffer;
-  } finally {
-    await browser.close();
+    browser = await puppeteer.default.launch({
+      executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
   }
-}
+
+  const page = await browser.newPage();
+  await page.setContent(html, { waitUntil: 'load' });
+  const pdfBuffer = await page.pdf({ format: 'A4' });
+  await browser.close();
+  return pdfBuffer;
+};

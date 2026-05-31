@@ -3,19 +3,22 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "dev": "npx prisma generate && env-cmd -f .env.dev nodemon --exec tsx server.ts",
-    "prod": "npx prisma generate && env-cmd -f .env.prod nodemon --exec tsx server.ts",
-    "generate": "npx prisma generate",
+    "build": "prisma generate && tsc",
+    "dev": "nodemon --exec tsx server.ts",
+    "dev:live": "env-cmd -f .env.dev nodemon --exec tsx server.ts",
+    "prod": "nodemon --exec tsx server.ts",
     "serve": "env-cmd -f .env nodemon --exec tsx server.ts",
     "start": "node dist/server.js",
-    "watch": "nodemon --watch 'src/**' --exec \"npm run dev\"",
-    "generate:key": "node src/utils/generateKey.js"
+    "generate": "prisma generate",
+    "watch": "nodemon --watch 'src/**' --exec tsx server.ts",
+    "generate:key": "node src/utils/generateKey.js",
+    "render:build": "npm install && npm run build && npx puppeteer browsers install chrome"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6.19.0",
+    "@sparticuz/chromium": "^149.0.0",
     "bcrypt": "^5.1.1",
     "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
@@ -32,7 +35,9 @@
     "nodemailer": "^7.0.10",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
-    "puppeteer": "^24.31.0",
+    "pdf-lib": "^1.17.1",
+    "puppeteer": "^25.1.0",
+    "puppeteer-core": "^25.1.0",
     "swagger-ui-express": "^5.0.1",
     "twilio": "^5.10.6"
   },
@@ -54,6 +59,5 @@
     "typescript": "^5.5.4"
   },
   "keywords": [],
-  "type": "module",
   "description": ""
 }

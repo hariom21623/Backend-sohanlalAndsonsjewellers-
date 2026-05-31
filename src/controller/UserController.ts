@@ -51,57 +51,83 @@ class UserController {
   }
 
   // UPDATE USER
-  // UPDATE USER
-static async updateUser(req: Request, res: Response) {
-  try {
-    const { id } = req.params;
-    const updates = req.body;
+  static async updateUser(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const updates = { ...req.body }; // ✅ Clone karo taaki original body safe rahe
 
-    // Check if user wants to modify adminRole
-    if (updates.adminRole !== undefined) {
-      // Only admins can update adminRole
-      if (!req.user || req.user.adminRole !== true) {
-        return res.status(403).json({
-          success: false,
-          message: "Only admin can change adminRole.",
-        });
+      // ✅ FIX: 'id' ko updates object se delete kar do
+      if (updates.id) {
+        delete updates.id;
       }
-    }
 
-    // Hash password if updating
-    if (updates.password) {
-      const salt = bcrypt.genSaltSync(10);
-      updates.password = bcrypt.hashSync(updates.password, salt);
-    }
-
-    const updatedUser = await prisma.user.update({
-      where: { id },
-      data: updates,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phoneNumber: true,
-        adminRole: true,
-        created_at: true,
-        updated_at: true
+      // Check if user wants to modify adminRole
+      if (updates.adminRole !== undefined) {
+        if (!req.user || req.user.adminRole !== true) {
+          return res.status(403).json({
+            success: false,
+            message: "Only admin can change adminRole.",
+          });
+        }
       }
-    });
 
-    return res.json({
-      success: true,
-      message: "User updated successfully",
-      user: updatedUser
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Something went wrong."
-    });
+      // Hash password if updating
+      if (updates.password) {
+        const salt = bcrypt.genSaltSync(10);
+        updates.password = bcrypt.hashSync(updates.password, salt);
+      }
+
+      const updatedUser = await prisma.user.update({
+        where: { id },
+        data: updates, // ✅ Ab yahan sirf safe fields hain
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phoneNumber: true,
+          adminRole: true,
+          created_at: true,
+          updated_at: true,
+          address: true, // ✅ Address aur pincode bhi return mein le lo
+          pincode: true
+        }
+      });
+
+      return res.json({
+        success: true,
+        message: "User updated successfully",
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error("PRISMA UPDATE ERROR:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Something went wrong."
+      });
+    }
   }
-}
+  // ✅ YE HAI WO NEW API jo tumhare Frontend ko fresh data degi
+  static async getProfile(req: Request, res: Response) {
+    try {
+      const userId = req.user?.id; // Ab ye error nahi dega kyunki tumne types fix kar liye hain
+      if (!userId) return res.status(401).json({ success: false, message: "Unauthorized" });
 
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phoneNumber: true,
+          address: true, // ✅ Ab ye DB se fetch hoga
+          pincode: true  // ✅ Ab ye DB se fetch hoga
+        }
+      });
+      return res.json({ success: true, user });
+    } catch (error) {
+      return res.status(500).json({ success: false, message: "Error fetching profile" });
+    }
+  }
 
   // DELETE USER
   static async deleteUser(req: Request, res: Response) {

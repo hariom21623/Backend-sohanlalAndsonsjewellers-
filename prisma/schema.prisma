@@ -10,14 +10,20 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  email       String   @unique
-  password    String
-  phoneNumber String   @unique
-  adminRole   Boolean? 
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  email          String   @unique
+  password       String
+  phoneNumber    String   @unique  // database me phoneNumber hai
+  
+  // 🚀 NEW INJECTIONS: User permanent billing profile data layers
+  address        String?  @default("") // Defaults to blank string safely
+  pincode        String?  @default("")
+  alternatePhone String?  @default("")
+  
+  adminRole      Boolean? 
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
 }
 
 model Product {
@@ -65,4 +71,32 @@ model Bill {
 model Counter {
   id   String @id @map("_id")
   seq  Int
+}
+
+model Order {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String
+  customerName  String
+  customerPhone String
+  address       String
+  pincode       String
+  items         Json
+  
+  // ✅ Billing Calculation Fields (Server-side handled)
+  adminPrice     Float?    // Product ka base price
+  gstAmount      Float?    // 3% of adminPrice
+  shippingCharge Float?    // Dynamic based on pincode
+  discount       Float?    @default(0)
+  totalAmount    Float?    // Final = (adminPrice - discount) + gst + shipping
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId // Order karne wale user ki ID
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

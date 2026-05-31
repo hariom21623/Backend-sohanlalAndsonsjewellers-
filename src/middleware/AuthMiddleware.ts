@@ -1,24 +1,25 @@
-import  jwt from 'jsonwebtoken';
-import { Request, Response , NextFunction} from "express";
+import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from "express";
 
-const authMiddleware = (req: Request, res: Response, next: NextFunction) =>{
+const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
-    if(authHeader === null || authHeader === undefined){
-        return res.status(401).json({status:401, message:"UnAuthorized"})
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        console.log("❌ Auth Header missing or invalid format!");
+        return res.status(401).json({ message: "UnAuthorized" });
     }
 
     const token = authHeader.split(" ")[1];
-
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-        return res.status(500).json({ status: 500, message: "Internal Server Error" });
+    
+    try {
+        const payload = jwt.verify(token, process.env.JWT_SECRET as string);
+        (req as any).user = payload; 
+        console.log("✅ Auth Success!");
+        next(); 
+    } catch (err) {
+        console.log("❌ Token Verification Failed:", err);
+        return res.status(401).json({ message: "UnAuthorized: Token expired or invalid" });
     }
-    jwt.verify(token, secret, (err, payload) =>{
-        if(err)
-            return res.status(401).json({status: 401, message: "UnAuthorized"});
-        req.user = payload as any
-        next();
-    })
-}
+};
 
 export default authMiddleware;

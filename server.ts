@@ -16,7 +16,21 @@ const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 // ===========================
 // Middleware
 // ===========================
-app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
+// 1. .env se string lo aur comma se split karke array banao
+const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",") : [];
+
+// 2. CORS middleware ko update karo
+app.use(cors({
+  origin: function (origin, callback) {
+    // Agar request server-to-server hai (!origin) ya origin allowed list mein hai
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
